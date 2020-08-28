@@ -30,10 +30,11 @@ class SearchNewUsers:
 
 
     def connect_users(self, block):
-        try:
-            list = block.find_all('li', 'discover-entity-card discover-entity-card--default-width ember-view')
-            for item in list:
-                username = item.find('span', 'discover-person-card__name').get_text()
+        list = block.find_all('li', 'discover-entity-card discover-entity-card--default-width ember-view')
+        for item in list:
+            username_tag = item.find('span', 'discover-person-card__name')
+            if username_tag:
+                username = username_tag.get_text()
                 username = ' '.join(re.findall(r'[A-z]{2,}', username))
 
                 description = item.find('span', 'discover-person-card__occupation t-14 t-black--light t-normal').get_text()
@@ -43,9 +44,9 @@ class SearchNewUsers:
                 user_href = item.find('a', 'ember-view discover-entity-type-card__link')['href']
                 if user_href not in self.users and self.users_validate(user_href):
                     self.users.append({'username': username, 'user_directory': user_href, 'description': description})
-        except Exception as e:
-            print('Error in reading network.')
-            print(e)
+            else:
+                print('Block don\'t found.')
+                break
 
 
     def start_app(self):
