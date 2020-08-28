@@ -1,0 +1,9 @@
+{
+  "email": "example@email.com",
+  "password": "password",
+  "search_by_words": [
+    "Frontend",
+    "Backend",
+    "FullStack"
+  ]
+}
