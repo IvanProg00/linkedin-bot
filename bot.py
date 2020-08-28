@@ -1,4 +1,5 @@
 from os import path
+import sys
 import json
 from time import sleep
 from selenium import webdriver
@@ -33,6 +34,7 @@ try:
         users = SearchNewUsers(browser, site_link, search_by_words).start_app()
         start(browser, site_link, users)
 except KeyboardInterrupt:
-    print('Aplication is finishing.')
+    print('Aplication is closing...')
+    sys.exit()
 
 browser.close()
