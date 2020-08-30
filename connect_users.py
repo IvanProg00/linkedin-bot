@@ -2,7 +2,7 @@ from os import path
 from selenium.common.exceptions import NoSuchElementException
 
 
-def start(browser, site_link, users):
+def start_connect(browser, site_link, users):
     for user in users:
         try:
             browser.get(site_link + user['user_directory'])

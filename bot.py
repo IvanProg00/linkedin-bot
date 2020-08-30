@@ -3,38 +3,59 @@ import sys
 import json
 from time import sleep
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from bs4 import BeautifulSoup
 from new_users import SearchNewUsers
-from connect_users import start
+from connect_users import start_connect
+from writer_messages import WriterMessages
+from errors_handler import error_handler, error_browser_handler
 
 site_link = 'https://www.linkedin.com'
 root = path.dirname(path.abspath(__file__))
-
-browser = webdriver.Chrome(path.join(root, 'drivers/chromedriver'))
-browser.get(path.join(site_link, 'login'))
-
-json_file = open(path.join(root, 'config.json'))
-file = json.load(json_file)
-json_file.close()
-email = file['email']
-password = file['password']
-search_by_words = list(map(lambda w : w.lower(), file["search_by_words"]))
-
-element = browser.find_element_by_id('username')
-element.send_keys(email)
-element = browser.find_element_by_id('password')
-element.send_keys(password)
-element.submit()
-
-while 'https://www.linkedin.com/checkpoint/challenge' in browser.current_url:
-    input('Please make a bot detection. When you finish enter \\n: ')
+num_conn = 10
 
 try:
-    while True:
-        users = SearchNewUsers(browser, site_link, search_by_words).start_app()
-        start(browser, site_link, users)
-except KeyboardInterrupt:
-    print('Aplication is closing...')
-    sys.exit()
+    json_file = open(path.join(root, 'config.json'), 'r')
+    config = json.load(json_file)
+    json_file.close()
+except FileNotFoundError:
+    error_handler('Error, file not found.')
+except json.JSONDecodeError:
+    error_handler('Error in compilation json.')
+if type(config) is not dict:
+    error_handler('Error, json file must be dictionary.')
+email = config.get('email') or ''
+password = config.get('password') or ''
+search_by_words = list(map(lambda w : w.lower(), config.get("search_by_words"))) or []
+message = config.get('message')
 
+try:
+    browser = webdriver.Chrome(path.join(root, 'drivers/chromedriver'))
+    browser.get(path.join(site_link, 'login'))
+
+    element = browser.find_element_by_id('username')
+    element.send_keys(email)
+    element = browser.find_element_by_id('password')
+    element.send_keys(password)
+    element.submit()
+    if not browser.current_url.startswith(path.join(site_link, 'feed')):
+        error_browser_handler(browser, 'Login or Password is incorrect.')
+
+    while path.join(site_link, 'checkpoint/challenge') in browser.current_url:
+        input('Please make a bot detection. When you finish enter \\n: ')
+
+    # for i in range(1, num_conn):
+    #     print(f'Bot starts to find and connect people: {i}.')
+    #     users = SearchNewUsers(browser, site_link, search_by_words).start()
+    #     start_connect(browser, site_link, users)
+
+    print('Bot starts to write messages.')
+    WriterMessages(browser, site_link, message)
+
+except KeyboardInterrupt:
+    error_handler('Aplication is closing...')
+except WebDriverException:
+    error_handler('Browser closed.')
+
+print('Bot has finished his work.')
 browser.close()
