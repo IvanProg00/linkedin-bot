@@ -28,7 +28,7 @@ class WriterMessages:
                     sleep(3)
             user_selector = f'li.mn-connection-card:nth-child({self.user_counter}) a.mn-connection-card__link'
             try:
-                user_href = BeautifulSoup(self.browser.page_source).select_one(user_selector).get('href')
+                user_href = BeautifulSoup(self.browser.page_source, 'html.parser').select_one(user_selector).get('href')
                 self.browser.find_element_by_css_selector(user_selector).click()
                 self.users_watched.append(user_href)
                 self.send_message()
@@ -63,11 +63,12 @@ class WriterMessages:
         except ElementClickInterceptedException:
             print('I can\'t Click message.')
             return
-        body = BeautifulSoup(self.browser.page_source)
+        sleep(0.3)
+        body = BeautifulSoup(self.browser.page_source.encode('utf-8'), 'html.parser')
         if body.select_one('ul.msg-s-message-list-content'):
             print('This user has messages.')
         else:
-            sleep(0.3)
             self.browser.find_element_by_css_selector('div.msg-form__contenteditable').send_keys(self.message)
             sleep(0.3)
             self.browser.find_element_by_css_selector('button.msg-form__send-button').click()
+        self.browser.find_element_by_css_selector('section.msg-overlay-bubble-header__controls > button[data-control-name="overlay.close_conversation_window"]').click()

@@ -39,15 +39,18 @@ try:
     element.send_keys(password)
     element.submit()
     if not browser.current_url.startswith(path.join(site_link, 'feed')):
-        error_browser_handler(browser, 'Login or Password is incorrect.')
+        print('Login or Password is incorrect.')
 
     while path.join(site_link, 'checkpoint/challenge') in browser.current_url:
         input('Please make a bot detection. When you finish enter \\n: ')
 
-    # for i in range(1, num_conn):
-    #     print(f'Bot starts to find and connect people: {i}.')
-    #     users = SearchNewUsers(browser, site_link, search_by_words).start()
-    #     start_connect(browser, site_link, users)
+    sleep(0.5)
+    browser.find_element_by_css_selector('section.msg-overlay-bubble-header__controls > button:nth-child(3)').click()
+
+    for i in range(1, num_conn):
+        print(f'Bot starts to find and connect people: {i}.')
+        users = SearchNewUsers(browser, site_link, search_by_words).start()
+        start_connect(browser, site_link, users)
 
     print('Bot starts to write messages.')
     WriterMessages(browser, site_link, message)
@@ -55,7 +58,7 @@ try:
 except KeyboardInterrupt:
     error_handler('Aplication is closing...')
 except WebDriverException:
-    error_handler('Browser closed.')
+    error_browser_handler(browser, 'Browser closed.')
 
 print('Bot has finished his work.')
 browser.close()
