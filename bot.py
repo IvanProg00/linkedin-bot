@@ -4,7 +4,6 @@ import json
 from time import sleep
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
-from bs4 import BeautifulSoup
 from new_users import SearchNewUsers
 from connect_users import start_connect
 from writer_messages import WriterMessages
@@ -28,9 +27,10 @@ email = config.get('email') or ''
 password = config.get('password') or ''
 search_by_words = list(map(lambda w : w.lower(), config.get("search_by_words"))) or []
 message = config.get('message')
+browser = webdriver.Chrome
 
 try:
-    browser = webdriver.Chrome(path.join(root, 'drivers/chromedriver'))
+    browser = browser(path.join(root, 'drivers/chromedriver'))
     browser.get(path.join(site_link, 'login'))
 
     element = browser.find_element_by_id('username')

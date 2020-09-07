@@ -7,7 +7,6 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
 
-
 class WriterMessages:
     users_watched = []
     user_counter = 1

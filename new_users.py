@@ -4,7 +4,6 @@ from difflib import SequenceMatcher
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 
@@ -47,11 +46,10 @@ class SearchNewUsers:
                 test_by_desc = description.lower()
 
                 user_href = item.find('a', 'ember-view discover-entity-type-card__link')['href']
-                if user_href not in self.users and self.users_validate(user_href):
+                if user_href not in self.users and self.users_validate(test_by_desc):
                     self.users.append({'username': username, 'user_directory': user_href, 'description': description})
             else:
                 print('Block don\'t found.')
-                break
 
 
     def start(self):
