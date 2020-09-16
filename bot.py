@@ -47,10 +47,10 @@ try:
     sleep(0.5)
     browser.find_element_by_css_selector('section.msg-overlay-bubble-header__controls > button:nth-child(3)').click()
 
-    for i in range(1, num_conn):
-        print(f'Bot starts to find and connect people: {i}.')
-        users = SearchNewUsers(browser, site_link, search_by_words).start()
-        start_connect(browser, site_link, users)
+    # for i in range(1, num_conn):
+    #     print(f'Bot starts to find and connect people: {i}.')
+    #     users = SearchNewUsers(browser, site_link, search_by_words).start()
+    #     start_connect(browser, site_link, users)
 
     print('Bot starts to write messages.')
     WriterMessages(browser, site_link, message)

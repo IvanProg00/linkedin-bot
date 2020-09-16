@@ -27,9 +27,11 @@ class SearchNewUsers:
 
 
     def users_validate(self, user_desc):
-        for w in self.search_by_words:
-            if SequenceMatcher(None, user_desc, w).quick_ratio() > 0.4:
-                return True
+        user_words = user_desc.split(' ')
+        for w1 in self.search_by_words:
+            for w2 in user_words:
+                if SequenceMatcher(None, w1, w2).quick_ratio() > 0.65:
+                    return True
         return False
 
 

@@ -62,12 +62,20 @@ class WriterMessages:
         except ElementClickInterceptedException:
             print('I can\'t Click message.')
             return
-        sleep(0.3)
+        sleep(0.5)
         body = BeautifulSoup(self.browser.page_source.encode('utf-8'), 'html.parser')
-        if body.select_one('ul.msg-s-message-list-content'):
-            print('This user has messages.')
-        else:
+
+        try:
+            WebDriverWait(self.browser, 1.2).until(
+                expected_conditions.presence_of_element_located(
+                    (By.CSS_SELECTOR, 'msg-s-message-list-content')
+                )
+            )
             self.browser.find_element_by_css_selector('div.msg-form__contenteditable').send_keys(self.message)
             sleep(0.3)
             self.browser.find_element_by_css_selector('button.msg-form__send-button').click()
+        except TimeoutException:
+            print('This user has messages.')
+
         self.browser.find_element_by_css_selector('section.msg-overlay-bubble-header__controls > button[data-control-name="overlay.close_conversation_window"]').click()
+        sleep(0.2)
