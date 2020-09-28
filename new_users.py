@@ -1,3 +1,4 @@
+from errors_handler import error_browser_handler
 from os import path
 from get_info import transform_text
 from difflib import SequenceMatcher
@@ -20,8 +21,7 @@ class SearchNewUsers:
                     )
                 )
         except TimeoutException:
-            print('Error in loading file.')
-            browser.close()
+            error_browser_handler(browser, 'Error in loading file.')
         self.browser = browser
         self.search_by_words = search_by_words
 
@@ -52,11 +52,12 @@ class SearchNewUsers:
                     self.users.append({'username': username, 'user_directory': user_href, 'description': description})
             else:
                 print('Block don\'t found.')
+                break
 
 
     def start(self):
         source = BeautifulSoup(self.browser.page_source, 'html.parser').find('div', 'application-outlet')
-        blocks = source.find_all('li', 'mn-cohort-view--list-item ember-view', limit=5)
+        blocks = source.find_all('li', 'mn-cohort-view--list-item ember-view', limit=10)
         for block in blocks:
             self.connect_users(block)
         return self.users

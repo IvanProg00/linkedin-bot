@@ -1,9 +1,10 @@
 from os import path
-import sys
 import json
-from time import sleep
 from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions
 from new_users import SearchNewUsers
 from connect_users import start_connect
 from writer_messages import WriterMessages
@@ -38,14 +39,19 @@ try:
     element = browser.find_element_by_id('password')
     element.send_keys(password)
     element.submit()
-    if not browser.current_url.startswith(path.join(site_link, 'feed')):
-        print('Login or Password is incorrect.')
 
     while path.join(site_link, 'checkpoint/challenge') in browser.current_url:
         input('Please make a bot detection. When you finish enter \\n: ')
 
-    sleep(0.5)
-    browser.find_element_by_css_selector('section.msg-overlay-bubble-header__controls > button:nth-child(3)').click()
+    if not browser.current_url.startswith(path.join(site_link, 'feed')):
+        error_browser_handler(browser, 'Login or Password is incorrect.')
+
+    try:
+        WebDriverWait(browser, 10).until(expected_conditions.element_to_be_clickable(
+            (By.CSS_SELECTOR, 'header.msg-overlay-bubble-header')
+        )).click()
+    except TimeoutException:
+        print("Button messages not found.")
 
     for i in range(1, num_conn):
         print(f'Bot starts to find and connect people: {i}.')

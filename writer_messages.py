@@ -8,9 +8,9 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
 
 class WriterMessages:
-    users_watched = []
     user_counter = 1
     num_to_update = 40
+    max_users = 95
 
 
     def __init__(self, browser, site_link, message):
@@ -20,25 +20,30 @@ class WriterMessages:
 
         self.go_to_network_page()
 
-        while self.user_counter < 95:
-            if self.user_counter > self.num_to_update:
-                for i in range(floor(self.user_counter / (self.num_to_update + 1))):
-                    self.browser.execute_script('window.scrollTo(0, document.body.scrollHeight)')
-                    sleep(3)
-            user_selector = f'li.mn-connection-card:nth-child({self.user_counter}) a.mn-connection-card__link'
+        while self.user_counter < self.max_users:
             try:
+                selector_card_li = 'li.mn-connection-card'
+                if self.user_counter > self.num_to_update:
+                    for i in range(floor(self.user_counter / (self.num_to_update + 1))):
+                        sleep(1)
+                        self.browser.execute_script('window.scrollTo(0, document.body.scrollHeight)')
+                        WebDriverWait(self.browser, 10).until(expected_conditions.presence_of_element_located(
+                            (By.CSS_SELECTOR, f'{selector_card_li}:nth-child({(i + 1) * self.num_to_update + 1})')
+                        ))
+                user_selector = f'{selector_card_li}:nth-child({self.user_counter}) a.mn-connection-card__link'
+                elem = WebDriverWait(browser, 10).until(expected_conditions.element_to_be_clickable(
+                    (By.CSS_SELECTOR, user_selector)
+                ))
                 user_href = BeautifulSoup(self.browser.page_source, 'html.parser').select_one(user_selector).get('href')
-                self.browser.find_element_by_css_selector(user_selector).click()
-                self.users_watched.append(user_href)
+                elem.click()
                 self.send_message()
                 print(f'{self.user_counter}. I was on link {user_href}.')
                 self.go_to_network_page()
                 self.user_counter += 1
-            except AttributeError:
+            except TimeoutException:
                 print('All contacts readed or some Error.')
                 break
 
-        print(self.users_watched)
 
 
     def go_to_network_page(self):
@@ -50,12 +55,10 @@ class WriterMessages:
 
         try:
             WebDriverWait(self.browser, 5).until(
-                expected_conditions.presence_of_element_located(
+                expected_conditions.element_to_be_clickable(
                     (By.CSS_SELECTOR, message_btn)
                 )
-            )
-            sleep(0.3)
-            self.browser.find_element_by_css_selector(message_btn).click()
+            ).click()
         except TimeoutException:
             print('Button message not found.')
             return
@@ -66,14 +69,15 @@ class WriterMessages:
         body = BeautifulSoup(self.browser.page_source.encode('utf-8'), 'html.parser')
 
         try:
-            WebDriverWait(self.browser, 1.2).until(
+            WebDriverWait(self.browser, 1.5).until_not(
                 expected_conditions.presence_of_element_located(
-                    (By.CSS_SELECTOR, 'msg-s-message-list-content')
+                    (By.CSS_SELECTOR, 'ul.msg-s-message-list-content')
                 )
             )
             self.browser.find_element_by_css_selector('div.msg-form__contenteditable').send_keys(self.message)
-            sleep(0.3)
-            self.browser.find_element_by_css_selector('button.msg-form__send-button').click()
+            WebDriverWait(self.browser, 3).until(expected_conditions.element_to_be_clickable(
+                (By.CSS_SELECTOR, 'button.msg-form__send-button')
+            )).click()
         except TimeoutException:
             print('This user has messages.')
 
